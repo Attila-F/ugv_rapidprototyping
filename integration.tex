@@ -34,14 +34,25 @@ A bemeneti interfészt a Controller\_U struktúra implementálja, ennek a válto
 
 Miután beállítottuk a bemeneteket, a Controller\_step() függvény meghívásával \textbf{léptethetjük} a modellt. A lépés megegyezik a generált rendszer \textbf{1 mintavételi idejű} lépésével. A Step függvény lefutása közben frissülnek a rendszer belső állapotai, valamint Controller\_Y-ban a kimenetek. A kimenetet hasonlóléppen állítja elő a rendszer, Controller\_Y struktúrában tárolva.
 
-A bemenetek megadása, léptetés, kimenet kiolvasása az az elemi lépéssorozat, melyet rendszeresen \textbf{időzítva} végrehajtunk. Ha a modellnek időtől függő belső állapotai is vannak\footnote{Ez minden esetben igaz, P szabályzónál bonyolultabb irányítás esetében}, \textbf{pontos időzítéssel} kell biztosítanunk a periodikus meghívást. Ha a rendszer túlnyomó része MATLAB-ban készült, ez csupán timer időzítővel is biztosítható, ám ha más feladatokat is el kell látnia a rendszernek, valószínűleg egy Hard Real-Time operációs rendszerre is szükségünk lesz.
+A bemenetek megadása, léptetés, kimenet kiolvasása az az elemi lépéssorozat, melyet rendszeresen \textbf{időzítve} végrehajtunk. Ha a modellnek időtől függő belső állapotai is vannak\footnote{Ez minden esetben igaz, P szabályzónál bonyolultabb irányítás esetében}, \textbf{pontos időzítéssel} kell biztosítanunk a periodikus meghívást. Ha a rendszer túlnyomó része MATLAB-ban készült, ez csupán timer időzítővel is biztosítható, ám ha más feladatokat is el kell látnia a rendszernek, valószínűleg egy Hard Real-Time operációs rendszerre is szükségünk lesz.
 
-\subsection{A FreeRTOS operációs rendszer}
-
-A FreeRTOS egy szabadon felhasználható Real-Time operációs rendszer. Módosított GPL licence alatt fejlesztik, miszerint üzleti felhasználása esetén szerepelhet zárt forráskódú projektben, viszont a kernelt nyílt forráskóduvá kell tenni, és kérésre kiadni.\footnote{Létezik támogatott változata is, (...)}
-
-A \verb!FreeRTOS! segítségével gyors és hatékony futást érhetünk el, és biztosíthatjuk a pontos időzítést, a többi adatgyűjtő taszk mellett is.
+Rögtön felhívnám a figyelmet, ha eddig nem vált volna nyilvánvalóvá, hogy a generált forrásfileok közül \textbf{csak} az ert\_main.c-t szabad módosítani. Ha úgy érezzük, hogy a többi generált kódba kell kézzel belenyúlni, akkor valamit elrontottunk. Továbbá meg lehet találni a megfelelő megfeleltetéseket a generált kód és a simulink modell között, de ez többnyire felesleges és \textbf{megbízhatatlan}. A legjobb fekete dobozként tekinteni a rendszerre, ha pedig valamilyen belső változóra szükség van debuggoláshoz, vegyük a fáradságot és vezessük ki kimenetre.
 
 \subsection{Példarendszer integrációja periodikus meghívással}
 
-A következő példa szemlélteti a generált kód integrálásának módját egy egyszerű kormányvezérlő alkalmazással.
+A példarendszerünk bemenete a vonal pozíciója, kimenete pedig a kívánt kormányszög. A főprogramunkból a következőképpen tudjuk meghívni a modellt:
+
+\begin{lstlisting}[frame=single]
+	/* Pass inputs */
+	Controller_U.Position = line_position;
+
+	/* Update model */
+	Controller_step();
+
+	/* Receive outputs */
+	servo_position = Controller_Y.Servo;
+\end{lstlisting}
+
+Ezt a kódot kell egy olyan függvénybe beletennünk, melynek tudjuk biztosítani a periodikus meghívását.
+
+A vonal pozíciót feldolgozhatjuk C-ben is akár, de minek, ha úgyis köré építünk egy MATLAB rendszert? Ehhez pointerrel tudjuk átadni az adattömböt, Simulinkben pedig vektor bemenetet kell beállítanunk.

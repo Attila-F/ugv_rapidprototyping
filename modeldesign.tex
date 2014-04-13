@@ -18,14 +18,50 @@ Az irányító rendszer 3 részre osztott logikai elrendezést követ. Először
 
 Ez a folyamat általában az első lépés mindenféle rendszer vagy irányítás tervezésekor. Az összefüggéseket és kezdeti, becsült paramétereit megadva létrehozhatunk egy modellt, mellyel később dolgozhatunk. A továbbiakban a sebességfüggetlen vonalkövető szabályzón demonstráljuk a lépéseket.
 
-A dinamikai összefüggéseket~(\ref{eq:of1}, \ref{eq:of2}), és a rendszer paramétereit (L: autó tengelytávolsága) ismerve felírhatjuk az \textbf{A} (állapotátmeneti) ~(\ref{eq:of3}) és \textbf{B} (állapotfrissítési) ~(\ref{eq:of4}) mátrixát az egyensúlyi pont körül $(d = 0; \delta = 0; v = 1)$ linearizálva.
+A dinamikai összefüggéseket~(\ref{eq:of1}, \ref{eq:of2}), és a rendszer paramétereit (L: autó tengelytávolsága) ismerve felírhatjuk az \textbf{A} (állapotátmeneti) és \textbf{B} (állapotfrissítési) mátrixát az egyensúlyi pont körül $(d = 0; \delta = 0; v = 1)$ linearizálva ~(\ref{eq:of3}).
 
 \begin{align} 
     \dot{d} &= sin(\delta + \Phi) \cdot v  \label{eq:of1} \\ 
     \dot{\delta} &= \frac{v}{L} \cdot tan(\Phi) + \kappa \label{eq:of2}
 \end{align}
 
-\begin{minipage}{0.45\linewidth}
+% \begin{minipage}{0.45\linewidth}
+%     \begin{align} \label{eq:of3}
+%         \begin{bmatrix}
+%                \dot{d} \\
+%                \dot{\delta}
+%         \end{bmatrix}
+%         =
+%         \begin{bmatrix}
+%                0 & \delta \cdot v \\
+%                0 & 0
+%         \end{bmatrix}
+%         %\cdot
+%         \begin{bmatrix}
+%                d \\
+%                \delta
+%         \end{bmatrix}
+%      \end{align}
+% \end{minipage}
+% \begin{minipage}{0.45\linewidth}
+%     \begin{align} \label{eq:of4}
+%         \begin{bmatrix}
+%                \dot{d} \\
+%                \dot{\delta}
+%         \end{bmatrix}
+%         =
+%         \begin{bmatrix}
+%            0 & 0 \\
+%            \frac{v}{L} & 1
+%          \end{bmatrix}
+%         %\cdot
+%          \begin{bmatrix}
+%                \Phi \\
+%                \kappa
+%         \end{bmatrix}
+%      \end{align}
+% \end{minipage}
+
     \begin{align} \label{eq:of3}
         \begin{bmatrix}
                \dot{d} \\
@@ -38,18 +74,10 @@ A dinamikai összefüggéseket~(\ref{eq:of1}, \ref{eq:of2}), és a rendszer para
         \end{bmatrix}
         %\cdot
         \begin{bmatrix}
-               \dot{\Phi} \\
-               \dot{\kappa}
+               d \\
+               \delta
         \end{bmatrix}
-     \end{align}
-\end{minipage}
-\begin{minipage}{0.45\linewidth}
-    \begin{align} \label{eq:of4}
-        \begin{bmatrix}
-               \dot{d} \\
-               \dot{\delta}
-        \end{bmatrix}
-        =
+		+
         \begin{bmatrix}
            0 & 0 \\
            \frac{v}{L} & 1
@@ -60,7 +88,6 @@ A dinamikai összefüggéseket~(\ref{eq:of1}, \ref{eq:of2}), és a rendszer para
                \kappa
         \end{bmatrix}
      \end{align}
-\end{minipage}
 
 A rendszermodell közvetlen megadása helyett szemléletileg jobb megoldást kapunk a MATLAB Symbolic toolbox használatával. A szimbolikus matematikát támogató szoftvercsomag segítségével automatikusan generálhatjuk a rendszer Jacobi-mátrixait, így leszűkíthetjük a program bemeneteit a rendszer paramétereire és nemlineáris összefüggéseire. További előny, hogy lényegesen több információt tartunk a kezünkben így, amivel például nemlineáris állapotbecslőt is készíthetünk.
      
@@ -122,7 +149,7 @@ A rendszer állapotteres alakját ismerve az egyik legegyszerűbb megoldás a st
     sys_c = ss(A-B*K, B, C, D);
 \end{lstlisting}
 
-Az eredményeket leellenőrizve ábrázoljuk az eredetileg instabil rendszer válaszát, és elégedetten hátradőlhetünk, mert működik.
+Az eredményeket leellenőrizve ábrázolhatjuk az eredetileg instabil rendszer válaszát, majd hátradőlve megbizonyosodhatunk a működéséről.
 
 \begin{figure}[!ht]
     \centering
@@ -172,6 +199,7 @@ A nemlineáris rendszerek felépítéséhez kiváló segédletet nyújt a Szabá
     \centering
     \includegraphics[width=\linewidth]{img/sys}
     \centering
+    \vspace{-30pt}
     \caption{Jacobi-mátrix alapú nemlineáris szimulátor blokkdiagram}
     \label{fig:model}
 \end{figure}
