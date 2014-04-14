@@ -36,12 +36,13 @@ Miután beállítottuk a bemeneteket, a Controller\_step() függvény meghívás
 
 A bemenetek megadása, léptetés, kimenet kiolvasása az az elemi lépéssorozat, melyet rendszeresen \textbf{időzítve} végrehajtunk. Ha a modellnek időtől függő belső állapotai is vannak\footnote{Ez minden esetben igaz, P szabályzónál bonyolultabb irányítás esetében}, \textbf{pontos időzítéssel} kell biztosítanunk a periodikus meghívást. Ha a rendszer túlnyomó része MATLAB-ban készült, ez csupán timer időzítővel is biztosítható, ám ha más feladatokat is el kell látnia a rendszernek, valószínűleg egy Hard Real-Time operációs rendszerre is szükségünk lesz.
 
-Rögtön felhívnám a figyelmet, ha eddig nem vált volna nyilvánvalóvá, hogy a generált forrásfileok közül \textbf{csak} az ert\_main.c-t szabad módosítani. Ha úgy érezzük, hogy a többi generált kódba kell kézzel belenyúlni, akkor valamit elrontottunk. Továbbá meg lehet találni a megfelelő megfeleltetéseket a generált kód és a simulink modell között, de ez többnyire felesleges és \textbf{megbízhatatlan}. A legjobb fekete dobozként tekinteni a rendszerre, ha pedig valamilyen belső változóra szükség van debuggoláshoz, vegyük a fáradságot és vezessük ki kimenetre.
+Rögtön felhívnám a figyelmet, ha eddig nem vált volna nyilvánvalóvá, hogy a generált forrásfileok közül \textbf{csak} az ert\_main.c-t szabad módosítani. Ha úgy érezzük, hogy a többi generált kódba kell kézzel belenyúlni, akkor valamit elrontottunk. Továbbá meg lehet találni a megfelelő megfeleltetéseket a generált kód és a simulink modell között, de ez többnyire felesleges és \textbf{megbízhatatlan}. A legjobb fekete dobozként tekinteni a rendszerre, ha pedig valamilyen belső változóra szükség van debuggoláshoz, vegyük a fáradságot és vezessük ki kimenetre\footnote{A Goto/From simulink blokkpárral ezt elegánsan megtehetjük, a vezetékek összekuszálása nélkül}.
 
 \subsection{Példarendszer integrációja periodikus meghívással}
 
 A példarendszerünk bemenete a vonal pozíciója, kimenete pedig a kívánt kormányszög. A főprogramunkból a következőképpen tudjuk meghívni a modellt:
 
+\lstset{escapechar=@,style=customc}
 \begin{lstlisting}[frame=single]
 	/* Pass inputs */
 	Controller_U.Position = line_position;

@@ -184,15 +184,15 @@ Megjegyzendő, hogy $\delta$ közvetlenül is mérhető, ha két optikai szenzor
 
 \subsection{Szimulációs környezet kiépítése}
 
-A megfelelő modell és szabályzó megtervezése után elkezdhetjük a szimulációs környezetet összeállítani. Egy egyszerűbb rendszer esetében akár közvetlenül implementálni lehetne a szabályzót C-ben, ám ha a rendszer összetetteb, jobban járunk ha a modell alapú fejlesztés elvét követjük. A RobonAUT versenyre az autó irányítórendszerének implementálásához ezt az utat választottuk. A döntésben szerepet játszott a MATLAB kiváló integrált állapotgép és szimuláció támogatása, a földrajzi távolság a tesztkörnyezet (Truggy) és a lusta fejlesztő lakhelye között, illetve a technológiai kihívás vonzása is.
+A megfelelő modell és szabályzó megtervezése után elkezdhetjük a szimulációs környezetet összeállítani. Egy egyszerűbb rendszer esetében akár közvetlenül implementálni lehetne a szabályzót C-ben, ám ha a rendszer összetetteb, jobban járunk ha a modell alapú fejlesztés elvét követjük. A RobonAUT versenyre az autó irányítórendszerének elkészítéséhez ezt az utat választottuk. A döntésben szerepet játszott a MATLAB kiváló integrált állapotgép és szimuláció támogatása, a technológiai kihívás, valamint a földrajzi távolság a tesztkörnyezet (Truggy) és a lusta fejlesztő lakhelye között.
 
 \paragraph{Felépítés}
 
-A rendszert két fő logikai részre bonthatjuk, az \textbf{Irányító rendszerre} és a \textbf{Szimulátorra}, illetve egy harmadik blokk interfészt biztosít e kettő között. A MATLAB (így a Simulink is) gyengén típusos nyelv, de lehetőség van a típusok erős állítására is. Ez beágyazott rendszereknél különösen hasznos, mivel a MATLAB egészen meglepő típusokat tud előállítani magának, ami nem előnyös sem a futási sebesség, sem a kézbentarthatóság szempontjából, különösen ha fixpontos számábrázolással szeretnénk implementálni a szabályzót.
+A rendszert két fő logikai részre bonthatjuk, az \textbf{Irányító rendszerre} és a \textbf{Szimulátorra}, illetve egy harmadik blokk interfészt biztosít e kettő között. A MATLAB (így a Simulink is) gyengén típusos nyelv, de lehetőség van a típusok erős állítására is. Ez beágyazott rendszereknél különösen hasznos, mivel a MATLAB egészen meglepő típusokat tud előállítani magának, ami nem előnyös sem a futási sebesség, sem a kézbentarthatóság szempontjából, különösen ha fixpontos számábrázolással szeretnénk dolgozni.
 
 \paragraph{Szimulátor}
 
-A megállapított rendszermodell alapján felépíthetjük a szimulátort. Hiába terveztük a szabályzót a linearizált modellhez, a szimulátornak mindig a legelső lépésben meghatározott, potenciálisan nemlineáris összefüggések alapján kell felépülnie, különben csak magunkat csapjuk be a hibás szimulációval, és az egész technológia nem ér semmit.
+A megállapított rendszermodell alapján felépíthetjük a szimulátort. Hiába terveztük a szabályzót a linearizált modellhez, a szimulátornak mindig a legelső lépésben meghatározott, gyakran nemlineáris összefüggések alapján kell felépülnie, különben csak magunkat csapjuk be a hibás szimulációval, és az egész technológia nem ér semmit.
 A nemlineáris rendszerek felépítéséhez kiváló segédletet nyújt a Szabályozástechnika tárgy 5-6. gyakorlata, illetve annak felkészülési anyaga\cite[p.~319-354]{szabtech}, így erre nem térünk ki. Amennyiben a rendszermodellt a Jacobi mátrixok segítségével generáltuk, célszerűbb közvetlenül azt felhasználni a szimulációban a blokkokból felépített rendszer helyett, így nem csak paraméter-, hanem rendszerszintű változás esetén sem kell kézzel utólag módosítani a szimulátort.
 
 \begin{figure}[!ht]
@@ -230,7 +230,7 @@ A magas szintű irányítás felel a szabályzás és állapotgép alapján tör
 
 Az elkészült szabályzóból \verb!C! (vagy \verb!C++!, \verb!Verilog! és \verb!PLC!) kódot generálhatunk, melyet beágyazhatunk a rendszerbe. A generált kód egyfajta statikus osztályként működik, vannak belső tárolói és tagfüggvényei, de nem szükséges a példányosítása.
 
-Az első lépés a kódgenerálás előkészítéséhez a megfelelő \textbf{solver} beálítása. Ezt a \textbf{Simulation/Configuration parameters... (Ctrl + E)} menüpontban tehetjük meg a \textbf{Solver} menüpontban. A típust Fixed-step-re kell állítani, a solvert pedig discrete-re, hogy egyáltalán nem legyenek folytonos állapotok a modellünkben. Ezután ne felejtsük el megadni a mintavételi idejét a rendszernek, másodpercben.
+Az első lépés a kódgenerálás előkészítéséhez a megfelelő \textbf{solver} beálítása. Ezt a \textbf{Simulation/Configuration parameters... (Ctrl + E)} menüpontban tehetjük meg a \textbf{Solver} menüpontban. A típust Fixed-step-re kell állítani, a solvert pedig discrete-re, hogy ne legyenek folytonos állapotok a modellünkben. Ezután ne felejtsük el megadni a mintavételi idejét a rendszernek, másodpercben.
 Ezt a beállítást célszerű már a modell létrehozásakor, a legelső lépésként elvégezni, ugyanis egy folytonos környezetben épített modell nem feltétlenül fog működni diszkrét solverrel! (Alternatív módon \textbf{Atomic Subsystem} blokkba helyezhetjük a fordítani kívánt rendszert, amennyiben mindenképpen folytonos idejű szimulátorral szeretnénk dolgozni. Ekkor nem szükséges a solver módosítása, viszont gondoskodni kell a mintavételi idő váltásról.)
 
 A tényleges kódgeneráláshoz szükség van egy MATLAB által támogatott \verb!C/C++! compilerre is. A teljes lista megtekinthető a MathWorks weboldalán.\footnote{http://www.mathworks.com/support/compilers/}
@@ -261,7 +261,7 @@ A kezelhetőséget javítja, ha a \textbf{Code placement}-ben a \textbf{Code pac
 
 \subsection{Kódgenerálás}
 
-A megfelelő beállítás után a Simulink modellben keressük meg azt a blokkot, melyből kódot szeretnénk generálni. Egy nagy rendszerben akár több részben is lehet kódot generálni, pl. kapcsolható működés, vagy eltérő mintavételi idő esetén hasznos. Jelen esetben az Irányító rendszer blokkját szeretnénk felhasználni, melynek bemenete a szenzoroktól kapott közvetlen jel, kimenete pedig a szervójel. A blokkon jobb kattintás, majd \textbf{C/C++ Code} $\rightarrow$ \textbf{Build This Subsystem} (Régebbi MATLAB verziókban MATLAB Coder, illetve Real Time Workshop (RTW) menüpontokat kell keresni). A generált fileok a \verb!MATLAB Current Working Folder!-be kerülnek, nem a generált rendszer mellé.
+A megfelelő beállítás után a Simulink modellben keressük meg azt a blokkot, melyből kódot szeretnénk generálni. Egy nagy rendszerben akár több részben is lehet kódot generálni, pl. kapcsolható működés, vagy eltérő mintavételi idő esetén hasznos. Jelen esetben az Irányító rendszer blokkját szeretnénk felhasználni, melynek bemenete a szenzoroktól kapott közvetlen jel, kimenete pedig a szervójel. A blokkon jobb kattintás, majd \textbf{C/C++ Code} $\rightarrow$ \textbf{Build This Subsystem} (Régebbi MATLAB verziókban MATLAB Coder, illetve Real Time Workshop (RTW) menüpontokat kell keresni). A generált fileok a \verb!MATLAB Current Working Folder!-be kerülnek, nem a modell mappájába.
 
 
 
